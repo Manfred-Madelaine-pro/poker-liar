@@ -1,24 +1,10 @@
 import random as rd
 
+from statistics import Statistics
+
 
 MAX_PLAYABLE_CARDS = 3
 
-
-class Stats:
-    def __init__(self):
-        self.lies = 0
-        self.truths = 0
-
-        self.liar_calls = 0
-        self.good_calls = 0
-        self.missed_calls = 0
-
-        self.spotted = 0
-        self.wrongfully_accused = 0
-
-        self.worst_loss = 0
-        self.best_escape = 0
-        self.total_cards_exchanged = 0
 
 # AI
 # save brain
@@ -32,7 +18,7 @@ class Player:
         self.hand = []
         self.win = False
 
-        self.stats = Stats()
+        self.stats = Statistics()
 
     def __str__(self):
         return f"{self.name} [{len(self.hand)} cards]"
@@ -40,14 +26,17 @@ class Player:
     def do(self):
         return f"\t{self.name}: "
 
+    def get_stats(self):
+        return str(self.stats)
+
     def launch(self):
         bet = self.get_bet()
         print(f"betting on {bet.value()}")
 
-        cards = self.play(bet, True)
+        cards = self.play(True)
         return bet, cards
 
-    def play(self, bet, launch=False):
+    def play(self, launch=False):
         res = []
         min_amount = 1 if launch else 0
         for _ in range(rd.randint(min_amount, min(len(self.hand), MAX_PLAYABLE_CARDS))):
@@ -59,7 +48,6 @@ class Player:
         else:
             print(f"{self.do()}", [str(c) for c in res])
 
-        self.update_stats(bet, res)
         return res
 
     def get_bet(self):
@@ -82,14 +70,8 @@ class Player:
             self.hand = new_hand
 
     # ----- Stats -----
-    def update_stats(self, bet, action):
-        if not action:
-            print("denouncing!")
-            self.stats.liar_calls += 1
-        elif is_lying(bet, action):
-            self.stats.lies += 1
-        else:
-            self.stats.truths += 1
+    def update_stats(self, lied):
+        self.stats.lied += [lied]
 
     def is_spotted(self):
         self.stats.spotted += 1
@@ -102,10 +84,3 @@ class Player:
 
     def was_wrong(self):
         self.stats.missed_calls += 1
-
-
-def is_lying(bet, cards_played):
-    for c in cards_played:
-        if bet.value() != c.value():
-            return True
-    return False
