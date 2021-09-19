@@ -36,11 +36,30 @@ class Card:
 
 # Game: next player, previous player
 
+class Stats:
+    def __init__(self):
+        self.lies = 0
+        self.truths = 0
+
+        self.liar_calls = 0
+        self.good_calls = 0
+        self.missed_calls = 0
+
+        self.spotted = 0
+        self.wrongfully_accused = 0
+
+        self.worst_loss = 0
+        self.best_escape = 0
+        self.total_cards_exchanged = 0
+
+
 class Player:
     def __init__(self, name):
         self.name = name
         self.hand = []
         self.win = False
+
+        self.stats = Stats()
 
     def __str__(self):
         return f"{self.name} [{len(self.hand)} cards]"
@@ -63,10 +82,11 @@ class Player:
             res += [c]
 
         if not res:
-            print(f"{self.do()} Calling for liar! ")
+            print(f"{self.do()} Calling for liar!")
         else:
             print(f"{self.do()}", [str(c) for c in res])
 
+        self.update_stats(bet, res)
         return res
 
     def get_bet(self):
@@ -87,6 +107,31 @@ class Player:
 
             new_hand = [c for c in self.hand if c.value not in td.keys()]
             self.hand = new_hand
+
+    # ----- Stats -----
+    def update_stats(self, bet, action):
+        if not action:
+            print("denouncing!")
+            self.stats.liar_calls += 1
+        elif is_lying(bet, action):
+            self.stats.lies += 1
+        else:
+            self.stats.truths += 1
+
+    def is_spotted(self):
+        self.stats.spotted += 1
+
+    def is_innocent(self):
+        self.stats.wrongfully_accused += 1
+
+    def was_right(self):
+        self.stats.good_calls += 1
+
+    def was_wrong(self):
+        self.stats.missed_calls += 1
+
+    def was_wrong(self):
+        self.stats.missed_calls += 1
 
 
 def start(players_amount):
@@ -194,13 +239,24 @@ def handle_liar(players, curr=0):
 
 def check_liar(bet, last_played, liar_id, curr, players):
     print("\nChecking who is the liar:")
-    for c in last_played:
-        if bet.val() != c.val():
-            print(f"\tLast player ({players[liar_id].name}) lied! ", end="")
-            return liar_id
+    if is_lying(bet, last_played):
+        print(f"\tLast player ({players[liar_id].name}) lied! ", end="")
+        players[liar_id].is_spotted()
+        players[curr].was_right()
+        return liar_id
     print(f"\t{players[curr].name} was wrong! ", end="")
+    players[liar_id].is_innocent()
+    players[curr].was_wrong()
+
     is_winner(players[liar_id])
     return curr
+
+
+def is_lying(bet, cards_played):
+    for c in cards_played:
+        if bet.val() != c.val():
+            return True
+    return False
 
 
 def is_winner(player):
