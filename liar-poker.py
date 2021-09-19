@@ -1,5 +1,7 @@
 import random as rd
 
+from card import Card
+
 # choose users
 # default AI
 
@@ -7,22 +9,6 @@ import random as rd
 PLAYERS_AMOUNT = 3
 MAX_AMOUNT = 3
 DELAY = 10
-
-
-class Card:
-    def __init__(self, value, color):
-        self.value = value
-        self.color = color
-
-    def __str__(self):
-        v = self.val()
-        c = ["♤", "♡", "♢", "♧"][self.color]
-        return f"{v}-{c}"
-
-    def val(self):
-        v = self.value
-        v = v if v <= 10 else ["J", "Q", "K"][v % 10 - 1]
-        return v
 
 
 # clean
