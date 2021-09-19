@@ -42,7 +42,7 @@ class Player:
 
     def launch(self):
         bet = self.get_bet()
-        print(f"betting on {bet.val()}")
+        print(f"betting on {bet.value()}")
 
         cards = self.play(bet, True)
         return bet, cards
@@ -67,18 +67,18 @@ class Player:
         return b
 
     def remove_same_cards(self):
-        self.hand.sort(key=lambda c: c.value)
+        self.hand.sort(key=lambda c: c.rank)
 
         # to_discard
         td = {}
         for c in self.hand:
-            td[c.value] = td.get(c.value, 0) + 1
+            td[c.rank] = td.get(c.rank, 0) + 1
 
         td = {k: v for k, v in td.items() if v > 3}
         if td:
             print(f"\t{self.do()} discards following cards: {list(td.keys())}")
 
-            new_hand = [c for c in self.hand if c.value not in td.keys()]
+            new_hand = [c for c in self.hand if c.rank not in td.keys()]
             self.hand = new_hand
 
     # ----- Stats -----
@@ -106,6 +106,6 @@ class Player:
 
 def is_lying(bet, cards_played):
     for c in cards_played:
-        if bet.val() != c.val():
+        if bet.value() != c.value():
             return True
     return False

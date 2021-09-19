@@ -14,7 +14,7 @@ PLAYERS_AMOUNT = 3
 
 def start(players_amount):
     players = [Player("P" + str(i)) for i in range(players_amount)]
-    cards = [Card(c, n) for c in range(1, 14) for n in range(4)]
+    cards = [Card(rank, suit) for rank in range(1, 14) for suit in range(4)]
     deal(cards, players)
 
     starter_id = 0 # TODO random ?
@@ -85,7 +85,7 @@ def start_trick(players, starter_id):
     players[liar_id].hand += last_played + pile
     print(f"He gets +{len(pile) + len(last_played)} cards!")
 
-    print(f"\nSummary:\n- Bet: {bet.val()}\n- Last played: {[str(c) for c in last_played]}\n- Pile: {[str(c) for c in pile]}\n- Liar id: {liar_id}")
+    print(f"\nSummary:\n- Bet: {bet.value()}\n- Last played: {[str(c) for c in last_played]}\n- Pile: {[str(c) for c in pile]}\n- Liar id: {liar_id}")
 
     rd.shuffle(players[liar_id].hand)
 
@@ -132,7 +132,7 @@ def check_liar(bet, last_played, liar_id, curr, players):
 
 def is_lying(bet, cards_played):
     for c in cards_played:
-        if bet.val() != c.val():
+        if bet.value() != c.value():
             return True
     return False
 

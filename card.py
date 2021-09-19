@@ -1,18 +1,23 @@
 
+
+HIGH_RANKS = ["J", "Q", "K"]
+SUITS = ["♤", "♡", "♢", "♧"]
+
+
 class Card:
-    def __init__(self, value, color):
-        self.value = value
-        self.color = color
+    def __init__(self, rank, suit):
+        self.rank = rank
+        self.suit = suit
 
     def __str__(self):
-        v = self.val()
-        c = ["♤", "♡", "♢", "♧"][self.color]
-        return f"{v}-{c}"
+        r = self.value()
+        s = SUITS[self.suit]
+        return f"{r}-{s}"
 
-    def val(self):
-        v = self.value
-        v = v if v <= 10 else ["J", "Q", "K"][v % 10 - 1]
-        return v
+    def value(self):
+        r = self.rank
+        r = r if r <= 10 else HIGH_RANKS[r % 10 - 1]
+        return r
 
 
 def main():
