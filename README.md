@@ -38,7 +38,7 @@ Use mode
 Reuse players? 
 
 1- create AI
-Use lib
+Use lib (venv + install pytorch Linux) 
 Populate input
 Run ML
 Display output
@@ -63,3 +63,6 @@ Plays
 Outcome
 
 Read game? Opt
+
+
+Perf study & improvements 
