@@ -1,5 +1,9 @@
 # poker-liar
 
+Allow player picker 
+If provided before the game
+Create missing p then shuffle order 
+
 Ai
 Change random algo
 Use ML lib (torch)
@@ -26,7 +30,12 @@ Train on full or single game N times
 Filter winners (based on score?) 
 Reproduce
 Train child's again
-Display win ratio over generations 
+Display win ratio over generations
+
+Trainning mode (reproduction) 
+Use mode
+   See one turn, one game, the full game
+Reuse players? 
 
 
 Save games in file as Json (Game) 
