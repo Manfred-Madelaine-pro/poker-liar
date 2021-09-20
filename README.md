@@ -37,6 +37,23 @@ Use mode
    See one turn, one game, the full game
 Reuse players? 
 
+1- create AI
+Use lib
+Populate input
+Run ML
+Display output
+Use output for decision
+Save & load brain? 
+
+2- integrate AI in one game
+Check outcome 
+
+3- run full game
+
+4- create training mode
+Display generation stats (win ratio, dénonciations...) 
+Save brain conf
+Load brain 
 
 Save games in file as Json (Game) 
 Hands
