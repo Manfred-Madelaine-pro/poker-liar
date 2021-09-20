@@ -10,8 +10,8 @@ NO_PLAYERS_LEFT = "No players left"
 
 # Stats: par game, globale, par joueur (et si plus de joueurs?)
 
-class PokerLiar:
 
+class PokerLiar:
     def __init__(self, players_amount):
         self.players = [Player("P" + str(i)) for i in range(players_amount)]
         cards = [Card(rank, suit) for rank in range(1, 14) for suit in range(4)]
@@ -99,7 +99,9 @@ class PokerLiar:
             self.current = self.next_player()
 
         print(f"\tHe gets +{len(pile) + len(last_played)} cards!")
-        print(f"\nSummary:\n- Bet: {bet.value()}\n- Last played: {[str(c) for c in last_played]}\n- Pile: {[str(c) for c in pile]}\n- Liar id: {liar_id}")
+        print(
+            f"\nSummary:\n- Bet: {bet.value()}\n- Last played: {[str(c) for c in last_played]}\n- Pile: {[str(c) for c in pile]}\n- Liar id: {liar_id}"
+        )
 
     def next_player(self, opt=None):
         c = self.current if opt is None else opt
@@ -110,7 +112,7 @@ class PokerLiar:
 
     def previous_player(self, curr=None):
         c = self.current if curr is None else curr
-        id = c-1 if c-1 >= 0 else len(self.players) - 1
+        id = c - 1 if c - 1 >= 0 else len(self.players) - 1
         if self.players[id].win:
             id = self.previous_player(curr=id)
         return id

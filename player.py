@@ -40,7 +40,7 @@ class Player:
         res = []
         min_amount = 1 if launch else 0
         for _ in range(rd.randint(min_amount, min(len(self.hand), MAX_PLAYABLE_CARDS))):
-            pos = rd.randint(0, len(self.hand)-1)
+            pos = rd.randint(0, len(self.hand) - 1)
             c = self.hand.pop(pos)
             res += [c]
 
