@@ -5,122 +5,115 @@ from player import Player
 
 
 PLAYERS_AMOUNT = 3
+NO_PLAYERS_LEFT = "No players left"
 
 
 # Stats: par game, globale, par joueur (et si plus de joueurs?)
 
-# Game: next player, previous player
+class PokerLiar:
 
+    def __init__(self, players_amount):
+        self.players = [Player("P" + str(i)) for i in range(players_amount)]
+        cards = [Card(rank, suit) for rank in range(1, 14) for suit in range(4)]
+        deal(cards, self.players)
 
-def start(players_amount):
-    players = [Player("P" + str(i)) for i in range(players_amount)]
-    cards = [Card(rank, suit) for rank in range(1, 14) for suit in range(4)]
-    deal(cards, players)
+        self.table = [p for p in self.players]
 
-    starter_id = 0 # TODO random ?
-    manche = 1
-    while len(players) > 1:
-        print(f"\n---------- Manche #{manche} ----------")
-        manche += 1
-        starter_id = rounds(players, starter_id)
+        self.game = 0
+        self.current = rd.randint(0, len(self.players))
 
-        print("\nStatus:")
-        [print(p) for p in players]
-        [print(p.get_stats()) for p in players]
-        [print(p.stats.stats()) for p in players]
-        print()
-        players = [p for p in players if not p.win]
+    def start(self):
+        self.game = 1
+        while len(self.players) > 1:
+            print(f"\n---------- Game #{self.game} ----------")
+            self.game += 1
 
-        if len(players) == 1:
-            print(players[0], "lost the game!")
+            self.rounds()
+
+            print("\nStatus:")
+            [print(p) for p in self.players]
+            [print(p.get_stats()) for p in self.players]
+            [print(p.stats.stats()) for p in self.players]
+            print()
+
+            self.filter_winners()
+
+            if len(self.players) == 1:
+                print(self.players[0], "lost the game!")
+                return 0
+
+    def filter_winners(self):
+        self.players = [p for p in self.players if not p.win]
+        self.current = self.current % len(self.players)
+
+    def rounds(self):
+        pile = []
+
+        [p.remove_same_cards() for p in self.players]
+
+        bet, last_played = self.players[self.current].launch()
+
+        end, liar_id = self.plays(bet, pile, last_played)
+
+        if end:
             return 0
 
-        starter_id = starter_id % len(players)
+        self.liar_judgment(bet, last_played, liar_id, pile)
 
+    def plays(self, bet, pile, last_played):
+        cards = last_played
+        last_played = []
+        while "playing":
+            pile, last_played = next_turn(pile, last_played, cards)
+            next_id = self.next_player()
 
-def rounds(players, starter_id):
-    t = 0
-    pile = []
-    last_played = []
-    curr = starter_id
+            if next_id == NO_PLAYERS_LEFT:
+                print("End of game")
+                return "End", None
 
-    [p.remove_same_cards() for p in players]
+            self.current = next_id
 
-    round = 0
-    print(f"- Round {t // len(players)}:", end=" ")
-    bet, cards = players[curr].launch()
-    pile, last_played, t = next_turn(pile, last_played, cards, t)
+            cards = self.players[self.current].play()
+            self.players[self.current].update_stats(is_lying(bet, cards))
 
-    liar_id, curr, ended = play(players, curr, round, t, bet, pile, last_played)
+            liar_id = self.previous_player()
 
-    if ended:
-        return curr
+            if len(cards) == 0:
+                break
 
-    liar_id = check_liar(bet, last_played, liar_id, curr, players)
+            self.players[liar_id].has_win()
 
-    # punish liar
-    players[liar_id].hand += last_played + pile
-    print(f"He gets +{len(pile) + len(last_played)} cards!")
+        return not "End", liar_id
 
-    print(f"\nSummary:\n- Bet: {bet.value()}\n- Last played: {[str(c) for c in last_played]}\n- Pile: {[str(c) for c in pile]}\n- Liar id: {liar_id}")
+    def liar_judgment(self, bet, last_played, liar_id, pile):
+        print("\nChecking who is the liar:")
 
-    rd.shuffle(players[liar_id].hand)
+        verdict = is_lying(bet, last_played)
+        self.players[liar_id].is_accused(verdict)
+        self.players[self.current].is_accusing(verdict)
 
-    return curr if curr != liar_id else next_player(players, curr)
+        if verdict:
+            self.players[liar_id].hand += last_played + pile
+        else:
+            self.players[liar_id].has_win()
+            self.current = self.next_player()
 
+        print(f"\tHe gets +{len(pile) + len(last_played)} cards!")
+        print(f"\nSummary:\n- Bet: {bet.value()}\n- Last played: {[str(c) for c in last_played]}\n- Pile: {[str(c) for c in pile]}\n- Liar id: {liar_id}")
 
-def play(players, curr, round, t, bet, pile, last_played):
-    while "playing":
-        next_id = next_player(players, curr)
+    def next_player(self, opt=None):
+        c = self.current if opt is None else opt
+        id = (c + 1) % len(self.players)
+        if self.players[id].win:
+            id = self.next_player(opt=id)
+        return id if id != self.current else NO_PLAYERS_LEFT
 
-        if next_id is None:
-            print("End of game")
-            return None, curr, "Ended"
-
-        curr = next_id
-
-        if round != t // len(players):
-            print("- Round {t // len(players)}")
-            round += 1
-
-        cards = players[curr].play()
-        players[curr].update_stats(is_lying(bet, cards))
-        liar_id = handle_liar(players, curr=curr)
-
-        if len(cards) == 0:
-            break
-
-        pile, last_played, t = next_turn(pile, last_played, cards, t)
-        is_winner(players[liar_id])
-
-    return liar_id, curr, not "Ended"
-
-
-def handle_liar(players, curr=0):
-    id = curr - 1
-    if id < 0:
-        id = len(players) - 1
-    if players[id].win:
-        id = handle_liar(players, curr=id)
-    return id
-
-
-# --- Verifications
-
-
-def check_liar(bet, last_played, liar_id, curr, players):
-    print("\nChecking who is the liar:")
-    if is_lying(bet, last_played):
-        print(f"\tLast player ({players[liar_id].name}) lied! ", end="")
-        players[liar_id].stats.accused += [True]
-        players[curr].stats.accusations += [True]
-        return liar_id
-    print(f"\t{players[curr].name} was wrong! ", end="")
-    players[liar_id].stats.accused += [False]
-    players[curr].stats.accusations += [False]
-
-    is_winner(players[liar_id])
-    return curr
+    def previous_player(self, curr=None):
+        c = self.current if curr is None else curr
+        id = c-1 if c-1 >= 0 else len(self.players) - 1
+        if self.players[id].win:
+            id = self.previous_player(curr=id)
+        return id
 
 
 def is_lying(bet, cards_played):
@@ -128,13 +121,6 @@ def is_lying(bet, cards_played):
         if bet.value() != c.value():
             return True
     return False
-
-
-def is_winner(player):
-    # print(player, f"win: {player.win}")
-    if not player.win and not player.hand:
-        print(player.name, "finished the game !")
-        player.win = True
 
 
 # --- Utils
@@ -148,17 +134,10 @@ def deal(cards, players):
         p.hand += [c]
 
 
-def next_turn(pile, last_played, cards, turn):
+def next_turn(pile, last_played, cards):
     pile += last_played
     last_played = cards
-    return pile, last_played, turn + 1
-
-
-def next_player(players, curr):
-    id = (curr+1) % len(players)
-    if players[id].win:
-        id = next_player(players, id)
-    return id if id != curr else None
+    return pile, last_played
 
 
 # --- Main
@@ -166,7 +145,8 @@ def next_player(players, curr):
 
 def main():
     print("\t-- Poker Liar -- \n")
-    start(PLAYERS_AMOUNT)
+    pl = PokerLiar(PLAYERS_AMOUNT)
+    pl.start()
 
 
 if __name__ == "__main__":

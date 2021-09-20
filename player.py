@@ -40,7 +40,8 @@ class Player:
         res = []
         min_amount = 1 if launch else 0
         for _ in range(rd.randint(min_amount, min(len(self.hand), MAX_PLAYABLE_CARDS))):
-            c = self.hand.pop()
+            pos = rd.randint(0, len(self.hand)-1)
+            c = self.hand.pop(pos)
             res += [c]
 
         if not res:
@@ -69,18 +70,23 @@ class Player:
             new_hand = [c for c in self.hand if c.rank not in td.keys()]
             self.hand = new_hand
 
+    def has_win(self):
+        if not self.win and not self.hand:
+            print(self.name, "finished the game !")
+            self.win = True
+
     # ----- Stats -----
+
     def update_stats(self, lied):
         self.stats.lied += [lied]
 
-    def is_spotted(self):
-        self.stats.spotted += 1
+    def is_accused(self, verdict):
+        if verdict:
+            print(f"\tLast player ({self.name}) lied!")
+        self.stats.accused += [verdict]
 
-    def is_innocent(self):
-        self.stats.wrongfully_accused += 1
+    def is_accusing(self, verdict):
+        if not verdict:
+            print(f"\t{self.name} was wrong!")
 
-    def was_right(self):
-        self.stats.good_calls += 1
-
-    def was_wrong(self):
-        self.stats.missed_calls += 1
+        self.stats.accusations += [verdict]
