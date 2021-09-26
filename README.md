@@ -1,5 +1,7 @@
 # poker-liar
 
+create venv
+install pytorch
 Allow player picker 
 If provided before the game
 Create missing p then shuffle order 

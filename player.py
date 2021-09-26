@@ -11,7 +11,6 @@ MAX_PLAYABLE_CARDS = 3
 # train
 # input : cards (max being deck), bet, pile size, last play size, prev & next plyr hand size
 
-
 class Player:
     def __init__(self, name):
         self.name = name
